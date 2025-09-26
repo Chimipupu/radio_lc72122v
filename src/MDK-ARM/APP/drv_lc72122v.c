@@ -15,6 +15,8 @@ static uint8_t s_tx_data_buf[4] = {0};
 static uint8_t s_select_am_fm_flg = AM_SELECT;
 static uint8_t s_am_ch = 0;
 static uint8_t s_fm_ch = 0;
+static uint16_t s_freq = 0;
+static uint16_t s_freq_data = 0;
 
 // (ROM) LC72122V用 AMラジオ周波数設定データテーブル
 const am_freq_data_t g_am_freq_data_tbl[] = {
@@ -43,6 +45,13 @@ static void tx_lc72122v_data(uint8_t *p_data);
 
 static void tx_lc72122v_data(uint8_t *p_data)
 {
+    s_freq_data = p_data[1];
+    s_freq_data |= (uint16_t)(p_data[2] << 8);
+    if(s_select_am_fm_flg == AM_SELECT) {
+        s_freq = GET_AM_FREQ(s_freq_data);
+    } else {
+        s_freq = GET_FM_FREQ(s_freq_data) * 10;
+    }
     // TODO:LC72122Vのデータ送信
 }
 
@@ -129,3 +138,17 @@ void drv_lc72122v_am_fm_channel_change(void)
         s_fm_ch = (s_fm_ch + 1) % g_fm_freq_data_tbl_size;
     }
 }
+
+// (DEBUG)デバッグ関連
+#ifdef DEBUG_DRV_LC72122V
+void dbg_drv_lc72122v_info_print(void)
+{
+    if(s_select_am_fm_flg == AM_SELECT) {
+        printf("[DEBUG] AM Radio Mode\n");
+        printf("[DEBUG] AM Freq = %d.%d [KHz]\n", s_freq / 10, s_freq % 10);
+    } else {
+        printf("[DEBUG] FM Radio Mode\n");
+        printf("[DEBUG] FM Freq = %d.%d [MHz]\n", s_freq / 10, s_freq % 10);
+    }
+}
+#endif // DEBUG_DRV_LC72122V

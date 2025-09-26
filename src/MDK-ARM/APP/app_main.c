@@ -30,4 +30,8 @@ void app_main(void)
 {
     // ラジオChを変更
     drv_lc72122v_am_fm_channel_change();
+
+#ifdef DEBUG_DRV_LC72122V
+    dbg_drv_lc72122v_info_print();
+#endif // DEBUG_DRV_LC72122V
 }
