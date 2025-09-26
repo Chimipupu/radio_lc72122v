@@ -317,7 +317,7 @@ int main(void)
     {
         // アプリメイン
         app_main();
-        LL_mDelay(500);
+        LL_mDelay(5000);
     }
 }
 
