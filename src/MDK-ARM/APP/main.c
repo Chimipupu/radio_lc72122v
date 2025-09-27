@@ -310,6 +310,9 @@ int main(void)
     // クロック初期化
     APP_SystemClockConfig();
 
+    // UART初期化
+    APP_ConfigUsart(USART1);
+
     // アプリ初期化
     app_main_init();
 
@@ -317,7 +320,7 @@ int main(void)
     {
         // アプリメイン
         app_main();
-        LL_mDelay(5000);
+        LL_mDelay(1000);
     }
 }
 

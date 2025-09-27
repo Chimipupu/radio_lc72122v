@@ -12,7 +12,7 @@
 #include "drv_lc72122v.h"
 
 static uint8_t s_tx_data_buf[4] = {0};
-static uint8_t s_select_am_fm_flg = AM_SELECT;
+static uint8_t s_select_am_fm_flg = FM_SELECT;
 static uint8_t s_am_ch = 0;
 static uint8_t s_fm_ch = 0;
 static uint16_t s_freq = 0;
@@ -25,7 +25,7 @@ const am_freq_data_t g_am_freq_data_tbl[] = {
     { 828/*[kHz]*/,     /*設定値:*/ 9312}, // [AM] NHK第2
     {1008/*[kHz]*/,     /*設定値:*/11232}, // [AM] ABCラジオ
     {1179/*[kHz]*/,     /*設定値:*/13056}, // [AM] MBSラジオ
-    {1314/*[kHz]*/,     /*設定値:*/11496}, // [AM] ラジオ大阪
+    {1314/*[kHz]*/,     /*設定値:*/14496}, // [AM] ラジオ大阪
 };
 const uint8_t g_am_freq_data_tbl_size = (sizeof(g_am_freq_data_tbl) / sizeof(g_am_freq_data_tbl[0]));
 
@@ -45,13 +45,6 @@ static void tx_lc72122v_data(uint8_t *p_data);
 
 static void tx_lc72122v_data(uint8_t *p_data)
 {
-    s_freq_data = p_data[1];
-    s_freq_data |= (uint16_t)(p_data[2] << 8);
-    if(s_select_am_fm_flg == AM_SELECT) {
-        s_freq = GET_AM_FREQ(s_freq_data);
-    } else {
-        s_freq = GET_FM_FREQ(s_freq_data) * 10;
-    }
     // TODO:LC72122Vのデータ送信
 }
 
@@ -132,9 +125,12 @@ void drv_lc72122v_am_fm_channel_change(void)
 {
     if(s_select_am_fm_flg == AM_SELECT) {
         drv_lc72122v_set_am_fm_freq(g_am_freq_data_tbl[s_am_ch].freq_data);
+        s_freq = GET_AM_FREQ(g_am_freq_data_tbl[s_am_ch].freq_data);
         s_am_ch = (s_am_ch + 1) % g_am_freq_data_tbl_size;
     } else {
         drv_lc72122v_set_am_fm_freq(g_fm_freq_data_tbl[s_fm_ch].freq_data);
+        // floatからuint16なので10倍にしてマクロで計算
+        s_freq = GET_FM_FREQ_X10(g_fm_freq_data_tbl[s_fm_ch].freq_data);
         s_fm_ch = (s_fm_ch + 1) % g_fm_freq_data_tbl_size;
     }
 }
@@ -145,7 +141,7 @@ void dbg_drv_lc72122v_info_print(void)
 {
     if(s_select_am_fm_flg == AM_SELECT) {
         printf("[DEBUG] AM Radio Mode\n");
-        printf("[DEBUG] AM Freq = %d.%d [KHz]\n", s_freq / 10, s_freq % 10);
+        printf("[DEBUG] AM Freq = %d [KHz]\n", s_freq);
     } else {
         printf("[DEBUG] FM Radio Mode\n");
         printf("[DEBUG] FM Freq = %d.%d [MHz]\n", s_freq / 10, s_freq % 10);

@@ -28,25 +28,25 @@ void dbg_drv_lc72122v_info_print(void);
 #define FM_SELECT       0x10
 
 // AMの設定したい周波数[KHz]の設定データ算出マクロ
-#define GET_AM_FREQ(freq_data)      (((freq_data) / 10.6667) - 45)
-#define GET_AM_FREQ_DATA(freq)      (((freq + 45) / 1.5) * 16)
+#define GET_AM_FREQ(freq_data)      (((freq_data) * 3 / 32) - 45)
+#define GET_AM_FREQ_DATA(freq)      (((freq + 45.0f) / 1.5f) * 16.0f)
 // FMの設定したい周波数[MHz]の設定データ算出マクロ
-#define GET_FM_FREQ(freq_data)      (((freq_data)  / 40) - 0.1)
-#define GET_FM_FREQ_DATA(freq)      (((freq + 0.1) / 2) / 0.0125)
+#define GET_FM_FREQ_X10(freq_data)  (((uint16_t)(((freq_data) / 4) - 1)))
+#define GET_FM_FREQ_DATA(freq)      ((((freq / 10.0f) + 0.1f) / 2.0f) * 80.0f)
 
 typedef struct {
     uint16_t freq;
     uint16_t freq_data;
-} am_freq_data_t;
+}am_freq_data_t;
 
 typedef struct {
     float freq;
     uint16_t freq_data;
-} fm_freq_data_t;
+}fm_freq_data_t;
 
 void drv_lc72122v_am_fm_select(uint8_t select);
-void drv_lc72122v_set_am_fm_freq_data(uint16_t freq);
 void drv_lc72122v_set_am_fm_freq(uint16_t data);
+// void drv_lc72122v_set_am_fm_freq_data(uint16_t freq);
 void drv_lc72122v_am_fm_channel_change(void);
 
 #endif // DRV_LC72122V_H
