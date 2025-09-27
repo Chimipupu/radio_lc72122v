@@ -20,24 +20,57 @@ static uint16_t s_freq_data = 0;
 
 // (ROM) LC72122V用 AMラジオ周波数設定データテーブル
 const am_freq_data_t g_am_freq_data_tbl[] = {
+#ifdef AM_OSAKA
     { 558/*[kHz]*/,     /*設定値:*/ 6432}, // [AM] ラジオ関西
     { 666/*[kHz]*/,     /*設定値:*/ 7584}, // [AM] NHK第1
     { 828/*[kHz]*/,     /*設定値:*/ 9312}, // [AM] NHK第2
     {1008/*[kHz]*/,     /*設定値:*/11232}, // [AM] ABCラジオ
     {1179/*[kHz]*/,     /*設定値:*/13056}, // [AM] MBSラジオ
     {1314/*[kHz]*/,     /*設定値:*/14496}, // [AM] ラジオ大阪
+#endif // AM_OSAKA
+
+#ifdef AM_TOKYO
+    { 594/*[kHz]*/,     /*設定値:*/ 6816}, // [AM] NHK 東京 第1放送
+    { 693/*[kHz]*/,     /*設定値:*/ 7872}, // [AM] NHK 東京 第2放送
+    { 810/*[kHz]*/,     /*設定値:*/ 9120}, // [AM] Eagle 810 (AFN TOKYO)
+    { 954/*[kHz]*/,     /*設定値:*/10656}, // [AM] TBSラジオ
+    {1134/*[kHz]*/,     /*設定値:*/12576}, // [AM] 文化放送
+    {1242/*[kHz]*/,     /*設定値:*/13728}, // [AM] ニッポン放送
+#endif // AM_TOKYO
 };
 const uint8_t g_am_freq_data_tbl_size = (sizeof(g_am_freq_data_tbl) / sizeof(g_am_freq_data_tbl[0]));
 
 // (ROM) LC72122V用 FMラジオ周波数設定データテーブル
 const fm_freq_data_t g_fm_freq_data_tbl[] = {
+#ifdef FM_OSAKA
+    // [大阪のFMラジオ局]
     {76.5/*[MHz]*/,     /*設定値:*/3064}, // [FM] FM COCOLO
     {80.2/*[MHz]*/,     /*設定値:*/3212}, // [FM] FM802
     {85.1/*[MHz]*/,     /*設定値:*/3408}, // [FM] FM大阪
-    {88.1/*[MHz]*/,     /*設定値:*/3528}, // [FM] NHK-FM
+    {88.1/*[MHz]*/,     /*設定値:*/3528}, // [FM] NHK FM 大阪
     {90.6/*[MHz]*/,     /*設定値:*/3628}, // [FM] MBSラジオ
     {91.9/*[MHz]*/,     /*設定値:*/3680}, // [FM] ラジオ大阪
     {93.3/*[MHz]*/,     /*設定値:*/3736}, // [FM] ABCラジオ
+#endif // FM_OSAKA
+
+#ifdef FM_NARA
+    // [奈良のFMラジオ局]
+    {78.4/*[MHz]*/,     /*設定値:*/3140}, // [FM] ならどっとFM
+    {77.5/*[MHz]*/,     /*設定値:*/3104}, // [FM] FMヤマト
+    {78.0/*[MHz]*/,     /*設定値:*/3124}, // [FM] FM五條
+    {81.4/*[MHz]*/,     /*設定値:*/3260}, // [FM] FMハイホー
+    {87.4/*[MHz]*/,     /*設定値:*/3500}, // [FM] NHK FM 奈良
+#endif // FM_NARA
+
+#ifdef FM_TOKYO
+    // [東京のFMラジオ局]
+    {80.0/*[MHz]*/,     /*設定値:*/3204}, // [FM] TOKYO FM (FM東京)
+    {81.3/*[MHz]*/,     /*設定値:*/3256}, // [FM] J-WAVE (ＦＭジャパン)
+    {82.5/*[MHz]*/,     /*設定値:*/3304}, // [FM] NHK FM 東京
+    {90.5/*[MHz]*/,     /*設定値:*/3624}, // [FM] TBSラジオ
+    {91.6/*[MHz]*/,     /*設定値:*/3668}, // [FM] 文化放送
+    {93.0/*[MHz]*/,     /*設定値:*/3724}, // [FM] ニッポン放送
+#endif // FM_TOKYO
 };
 const uint8_t g_fm_freq_data_tbl_size = (sizeof(g_fm_freq_data_tbl) / sizeof(g_fm_freq_data_tbl[0]));
 
@@ -61,9 +94,11 @@ void drv_lc72122v_am_fm_select(uint8_t select)
     if(s_select_am_fm_flg == AM_SELECT) {
         s_tx_data_buf[3] = 0x23;
         s_select_am_fm_flg = AM_SELECT;
+        // printf("[DEBUG] AM Radio Mode\n");
     } else {
         s_tx_data_buf[3] = 0x03;
         s_select_am_fm_flg = FM_SELECT;
+        // printf("[DEBUG] FM Radio Mode\n");
     }
 
     tx_lc72122v_data(&s_tx_data_buf[0]);
@@ -140,10 +175,8 @@ void drv_lc72122v_am_fm_channel_change(void)
 void dbg_drv_lc72122v_info_print(void)
 {
     if(s_select_am_fm_flg == AM_SELECT) {
-        printf("[DEBUG] AM Radio Mode\n");
         printf("[DEBUG] AM Freq = %d [KHz]\n", s_freq);
     } else {
-        printf("[DEBUG] FM Radio Mode\n");
         printf("[DEBUG] FM Freq = %d.%d [MHz]\n", s_freq / 10, s_freq % 10);
     }
 }
